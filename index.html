@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crossword</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./src/assets/css/slider.css">
+    <link rel="stylesheet" href="./src/assets/css/success_modal.css">
+    <link rel="stylesheet" href="./src/assets/css/style.css">
+    <link rel="stylesheet" href="./src/assets/css/header_icon.css">
+    <script src="./src/components/Slider.jsx"></script>
+    <script src="./src/components/Crossword.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        table {
+            border: 1px solid black;
+            margin-left: auto;
+            margin-right: auto;
+            border-spacing: 0;
+            /* Optional: ensures no extra space between cells */
+        }
+
+        th {
+            width: 30px;
+            /* Reduced width */
+            height: 30px;
+            /* Reduced height */
+            background: #ffbd59;
+            border: 1px solid black;
+            position: relative;
+        }
+
+        th input[type="text"] {
+            width: 100%;
+            height: 100%;
+            font-size: 16px;
+            /* Adjusted font size */
+            text-align: center;
+            border: none;
+            box-sizing: border-box;
+        }
+
+        .b {
+            background: black;
+            cursor: not-allowed;
+        }
+
+        .w {
+            background: white;
+        }
+
+        .w:hover {
+            background: #0fc0fc;
+        }
+
+        th span {
+            font-size: 12px;
+            /* Reduced font size */
+            position: absolute;
+            top: 2px;
+            left: 2px;
+        }
+
+        th b {
+            font-size: 24px;
+            /* Reduced font size */
+        }
+
+        .read-story-btn {
+            display: block;
+            width: 150px;
+            height: 40px;
+            margin: 20px auto;
+            margin-bottom: -25px;
+            background-color: #0fc0fc; /* Blue background */
+            color: #000000; /* Black text */
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            line-height: 40px; /* Vertically center text */
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="component">
+        <div class="icon-container">
+            <div class="icon-item">
+                <span class="">01:11</span>
+                <p>Timer</p>
+            </div>
+            <div class="icon-item">
+                <img class="icon" src="./public/images/gem.png" alt="">
+                <p>Gems</p>
+            </div>
+            <div class="icon-item">
+                <img class="icon" src="./public/images/flame.png" alt="">
+
+                <p>x4 Streak</p>
+            </div>
+            <div class="icon-item">
+                <span class="fas fa-envelope">1.2x</span>
+                <p>Multiplier</p>
+            </div>
+        </div>
+
+        <div class="icon-container">
+            <div class="icon-item">
+                <img class="icon" src="./public/images/volume-down (1).png" alt="">
+                <p>Sound</p>
+            </div>
+            <div class="icon-item">
+                <img class="icon" src="./public/images/research-arrows-circle.png" alt="">
+                <p>Restart</p>
+            </div>
+            <div class="icon-item">
+                <img class="icon" src="./public/images/pause-square.png" alt="">
+                <p>Pause</p>
+            </div>
+        </div>
+    </div>
+    <table id="table" cellspacing="0">
+        <tr>
+            <th row="0" col="0"><input type="text" maxlength="1"></th>
+            <th row="0" col="1"><input type="text" maxlength="1"></th>
+            <!-- more cells -->
+        </tr>
+        <tr>
+            <th row="1" col="0" class="b"><input type="text" maxlength="1"></th>
+            <th row="1" col="1"><input type="text" maxlength="1"></th>
+            <!-- more cells -->
+        </tr>
+        <!-- more rows -->
+
+
+    </table>
+
+    <!-- Read Story Button -->
+    <button class="read-story-btn">Read Story</button>
+
+
+    <!-- Question slider -->
+    <div class="carousel">
+        <div id="direction"></div>
+        <span id="questionIndex"></span>
+        <div class="carousel-container">
+            <div class="carousel-slide">
+                <div id="question">
+
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control prev" onclick="prevSlide()">&#10094;</button>
+        <button class="carousel-control next" onclick="nextSlide()">&#10095;</button>
+    </div>
+
+
+    <!-- The Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <img src="./graphics/correctmark.jpg" alt="">
+            <p>
+                <bold>Correct!</bold>
+            </p>
+            <p>Keep Going!</p>
+            <button class="modalbtn">Ok</button>
+        </div>
+    </div>
+
+    <div id="failModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <img src="./graphics/oops.jpg" alt="">
+            <p>
+                <bold>Oops</bold>
+            </p>
+            <p>Please Try Again!</p>
+            <button class="modalbtn">Ok</button>
+        </div>
+    </div>
+    <!-- <script src="script.js"></script> -->
+</body>
+<script>
+
+    //w - white
+    //b - black
+
+    var values = ["bbbbbbwbbwwwwwbbbbb", "bbbbbbwbbbbbwbbbbbb", "bbbbwwwwwwwwwwbbbbb", "bbbbbbwbbbbbwbbbbbb", "bbbbbbwbwwwwwbbwbbb", "bbbbbbwbwbbbwbbwbbb", "bbbbbbwbwbbbwbbwbbb", "bbbbbbwbbbbwwwwwwww", "wwwwwwwwwbbbwbbwbbb", "bbbbbbwbbbbbbbbwbbb", "bbbbbbwbbbbbbbbwbbb", "bbbbbbwbbbbbbbbwbbb", "bbbwwwwwwwbbbbbwbbb", "bbbbbbwbbbbbbbbwbbb"];
+    var total_rows = values.length;
+    var total_cols = values[0].length;
+    var spans_value = { "0,6": "1", "2,4": "4", "8,0": "8", "12,3": "9", "0,9": "2", "0,12": "3", "4,8": "5", "7,11": "7", "4,15": "6" };
+    var current = null;
+    var currentCells = null;
+    var previous = null;
+    var tempPrevious = null;
+    var togglebox5 = false
+    var steps = 0
+    function createFrameBoxes() {
+        var boxes = "";
+        for (let i = 0; i < values.length; i++) { //2
+            boxes += "<tr>";
+            for (let j = 0; j < values[i].length; j++) { //13
+                var s = spans_value[i + "," + j] ?? "";
+                boxes += `<th onclick='myclick(this)' ${values[i][j] == 'w' ? 'onkeyup="cellonkeyup()"' : ""} row='${i}' col='${j}' class="${values[i][j]}"><span>${s}</span><b></b></th>`;
+
+            }
+            boxes += "</tr>";
+        }
+        document.getElementById("table").innerHTML = boxes;
+
+    }
+
+    createFrameBoxes();
+
+    var box5 = document.querySelector(`.w[row='${4}'][col='${8}']`)
+    var questionCells = {
+        "1": {
+            "question": "Who is the most famous physicist \n with ALS that helped us understand space",
+            "answer": "STEPHENHAWKING",
+            "boxes":
+                [
+                    { row: 0, col: 6 },
+                    { row: 1, col: 6 },
+                    { row: 2, col: 6 },
+                    { row: 3, col: 6 },
+                    { row: 4, col: 6 },
+                    { row: 5, col: 6 },
+                    { row: 6, col: 6 },
+                    { row: 7, col: 6 },
+                    { row: 8, col: 6 },
+                    { row: 9, col: 6 },
+                    { row: 10, col: 6 },
+                    { row: 11, col: 6 },
+                    { row: 12, col: 6 },
+                    { row: 13, col: 6 }
+                ],
+            "direction": "down"
+        },
+
+        "2": {
+            "question": "What did Hedgehog pack for his trip to space",
+            "answer": "CROWN",
+            "boxes":
+                [
+                    { row: 0, col: 9 },
+                    { row: 0, col: 10 },
+                    { row: 0, col: 11 },
+                    { row: 0, col: 12 },
+                    { row: 0, col: 13 },
+                ],
+            "direction": "across"
+        },
+
+        "3": {
+            "question": "What assistive device did Rhino use?",
+            "answer": "WHITECANE",
+            "boxes":
+                [
+                    { row: 0, col: 12 },
+                    { row: 1, col: 12 },
+                    { row: 2, col: 12 },
+                    { row: 3, col: 12 },
+                    { row: 4, col: 12 },
+                    { row: 5, col: 12 },
+                    { row: 6, col: 12 },
+                    { row: 7, col: 12 },
+                    { row: 8, col: 12 }],
+            "direction": "down"
+        },
+
+        "4": {
+            "question": "What assistive device did Flamingo use?",
+            "answer": "WHEELCHAIR",
+            "boxes": [
+                { row: 2, col: 4 },
+                { row: 2, col: 5 },
+                { row: 2, col: 6 },
+                { row: 2, col: 7 },
+                { row: 2, col: 8 },
+                { row: 2, col: 9 },
+                { row: 2, col: 10 },
+                { row: 2, col: 11 },
+                { row: 2, col: 12 },
+                { row: 2, col: 13 }
+            ],
+            "direction": "across"
+        },
+        "5": {
+            "question": "Where did Flamingo, Rhino, and Hedgehog win a trip?",
+            "answer": "SPACE",
+            "boxes": [
+                { row: 4, col: 8 },
+                { row: 4, col: 9 },
+                { row: 4, col: 10 },
+                { row: 4, col: 11 },
+                { row: 4, col: 12 }
+            ],
+            "direction": "across"
+        },
+
+        "6": {
+            "question": "Who will be the first para-astronaut in space",
+            "answer": "JOHNMCFALL",
+            "boxes": [
+                { row: 4, col: 15 },
+                { row: 5, col: 15 },
+                { row: 6, col: 15 },
+                { row: 7, col: 15 },
+                { row: 8, col: 15 },
+                { row: 9, col: 15 },
+                { row: 10, col: 15 },
+                { row: 11, col: 15 },
+                { row: 12, col: 15 },
+                { row: 13, col: 15 }
+            ],
+            "direction": "down"
+        },
+
+        "7": {
+            "question": "What new job did Flamingo want to do instead?",
+            "answer": "ENGINEER",
+            "boxes": [
+                { row: 7, col: 11 },
+                { row: 7, col: 12 },
+                { row: 7, col: 13 },
+                { row: 7, col: 14 },
+                { row: 7, col: 15 },
+                { row: 7, col: 16 },
+                { row: 7, col: 17 },
+                { row: 7, col: 18 },
+                // { row: 7, col: 19 },
+                // { row: 7, col: 20 }
+            ],
+            "direction": "across"
+        },
+
+        "8": {
+            "question": "What job did Flamingo dream of having?",
+            "answer": "ASTRONAUT",
+            "boxes": [
+                { row: 8, col: 0 },
+                { row: 8, col: 1 },
+                { row: 8, col: 2 },
+                { row: 8, col: 3 },
+                { row: 8, col: 4 },
+                { row: 8, col: 5 },
+                { row: 8, col: 6 },
+                { row: 8, col: 7 },
+                { row: 8, col: 8 }
+                // { row: 8, col: 9 }
+            ],
+            "direction": "across"
+        },
+
+        "9": {
+            "question": "How else can Flamingo experience space while on earth",
+            "answer": "HARNESS",
+            "boxes": [
+                { row: 12, col: 3 },
+                { row: 12, col: 4 },
+                { row: 12, col: 5 },
+                { row: 12, col: 6 },
+                { row: 12, col: 7 },
+                { row: 12, col: 8 },
+                { row: 12, col: 9 },
+                // { row: 12, col: 10 },
+                // { row: 12, col: 11 },
+                // { row: 12, col: 12 }
+            ],
+            "direction": "across"
+        },
+
+
+        "10": {
+            "question": "How did Flamingo feel when he couldn't travel to space",
+            "answer": "SAD",
+            "boxes": [
+                { row: 4, col: 8 },
+                { row: 5, col: 8 },
+                { row: 6, col: 8 },
+            ],
+            "direction": "down"
+        },
+    };
+
+    //sets the current cell to a color and highlights it
+    function myclick(box) {
+        if (box.classList.contains("w")) {
+            if (current != null) {
+                current.style.background = "w";
+            }
+            current = box;
+            // current.onkeyup = function(event){
+            //     console.log('testing the mic')
+            //     console.log(current)
+            // }
+            let correct = document.querySelectorAll('.correct')
+            //Array.from(correct).forEach(element => {
+            //    element.classList.remove('correct')
+            //})
+  
+            let nextCells = document.querySelectorAll('.nextCell')
+            Array.from(nextCells).forEach(element => {
+                element.classList.remove('nextCell')
+            })
+
+            //box.style.background = "#ffbd59";
+            current.focus();
+
+            if (current == box5) togglebox5 = !togglebox5
+
+            var boxesBelongedTo = getBoxesBelongedTo(box, questionCells)
+            var htmlCells = getActualHtmlCells(boxesBelongedTo)
+
+            //currentCells = htmlCells[0]
+            currentCells = getCorrectAxialCell(htmlCells, previous)
+            highlightCells(currentCells)
+            let index = getCellsQuestionNumber(currentCells[0])
+            if(index && parseInt(index) && parseInt(index)==5 && !togglebox5){
+                showSlide(5)
+            }
+            else if(index && parseInt(index) && parseInt(index)==5 && togglebox5){
+                showSlide(10)
+            }
+            else if(index && parseInt(index)){
+                showSlide(parseInt(index))
+            }
+            // highlightCells(htmlCells)
+
+            // tempPrevious = previous.cloneNode(true);
+            // previous = current.cloneNode(true);
+            tempPrevious = previous
+            previous = current
+        }
+    }
+
+    //this function helps in typing of letters
+    document.body.onkeyup = function (event) {
+        event.stopPropagation()
+        if (current != null) {
+            if (event.keyCode >= 37 && event.keyCode <= 40) {
+                nextmover(event.keyCode);
+            } else if (event.keyCode >= 65 && event.keyCode <= 90) { // A-Z keys
+                let cellIsCorrect = current.classList.contains('correct')
+                if(!cellIsCorrect){
+                    current.querySelector("b").innerHTML = event.key.toUpperCase();
+                }
+                var row_b = parseInt(current.getAttribute('row'))
+                var col_b = parseInt(current.getAttribute('col'))
+
+                var nextBox = getNextBox(current, questionCells, 'forward')
+                var nextCell = getActualNextHtmlCell(nextBox)
+
+                var boxesBelongedTo = getBoxesBelongedTo(current, questionCells)
+                var cells = getActualHtmlCells(boxesBelongedTo)
+                cells = getCorrectAxialCell(cells, tempPrevious)
+                let position = positionOfCell(current, cells[0])
+                let lengthOfCells = cells[0].length - 1
+                if (lengthOfCells <= position) nextCell = current
+                current.classList.remove('cellhighlight')
+                current.classList.remove('nextCell')
+                nextCell.focus()
+                nextCell.click()
+                nextCell.classList.add('nextCell')
+                var answerCorrect = checkIfElementsCompletedCorrect(current, cells[0], 'row')
+                steps++
+                if (answerCorrect) {
+                    Array.from(cells[0]).forEach(element => {
+                        element.classList.remove('cellhighlight');
+                        element.classList.add('correct');
+                    });
+
+                    showSuccessModal();
+                    steps = 0
+                }
+                else if (!answerCorrect && position >= lengthOfCells) {
+                    showFailModal();
+                    steps = 0
+                }
+
+            } else if (event.keyCode === 8) { // Backspace key
+                let cellIsCorrect = current.classList.contains('correct')
+                if(!cellIsCorrect){
+                    current.querySelector("b").innerHTML = "";
+                }
+                var nextBox = getNextBox(current, questionCells, 'backward')
+                var nextCell = getActualNextHtmlCell(nextBox)
+                current.classList.remove('cellhighlight')
+                current.classList.remove('nextCell')
+                nextCell.focus()
+                nextCell.click()
+                nextCell.classList.add('nextCell')
+            }
+
+
+        }
+
+        previous = current
+    }
+
+    function inSameDirection(cell, prev) {
+        let row = cell.getAttribute('row')
+        let col = cell.getAttribute('col')
+
+        if (!prev) return false
+        let prev_row = prev.getAttribute('row')
+        let prev_col = prev.getAttribute('col')
+
+        let output = (row - prev_row) * (col - prev_col)
+        if (output == 0) return true
+
+        return false
+    }
+
+    function IsAdjacentTo(cell, prev) {
+        let row = cell.getAttribute('row')
+        let col = cell.getAttribute('col')
+
+        if (!prev) return false
+        let prev_row = prev.getAttribute('row')
+        let prev_col = prev.getAttribute('col')
+
+        let output = ((row - prev_row) == 1) || ((col - prev_col) == 1)
+        if (output == 0) return true
+
+        return output
+    }
+
+    function getCorrectAxialCell(htmlCellsCollections, prev) {
+        let cellIsInDirection = false
+        let correctCells = htmlCellsCollections
+        Array.from(htmlCellsCollections).forEach(cells => {
+            if (cells.includes(prev)) {
+                cellIsInDirection = inSameDirection(cells[0], prev)
+                if (cellIsInDirection) {
+                    correctCells = []
+                    correctCells.push(cells)
+                    return correctCells
+                }
+            }
+        })
+
+        return correctCells
+    }
+    function highlightCells(nestedCellsCollections) {
+        //clear formatting from previous elements
+        var previousHighlighted = document.querySelectorAll('.cellhighlight')
+        Array.from(previousHighlighted).forEach(element => {
+            element.classList.remove('cellhighlight');
+            // element.classList.remove('correct');
+        });
+
+        //Highlight new cells
+
+        var all = nestedCellsCollections.flat(Infinity);
+        Array.from(all).forEach(element => {
+            console.log('row: ', element.getAttribute('row'))
+            console.log('col: ', element.getAttribute('col'))
+            element.classList.add('cellhighlight');
+        });
+
+    }
+
+    function getBoxesBelongedTo(selectedCell, questionCells) {
+        let boxesBelongedTo = []
+        var row = selectedCell.getAttribute('row')
+        var col = selectedCell.getAttribute('col')
+        let spanElement = selectedCell.querySelector('span')
+        let spanKey = spanElement?.innerText
+        // let isAdjacentTo = IsAdjacentTo(selectedCell, tempPrevious)
+        // if(spanKey && !isAdjacentTo && steps<=0){
+        if(spanKey && steps<=0 && spanKey!='5'){
+            const boxes = questionCells[spanKey]['boxes'];
+            boxesBelongedTo.push(boxes)
+        }
+        else{
+            for (const key in questionCells) {
+                if (Object.hasOwnProperty.call(questionCells, key)) {
+                    const boxes = questionCells[key]['boxes'];
+                    for (const box of boxes) {
+                        if (box.row == row && box.col == col && box5 == selectedCell && togglebox5) {
+                            togglebox5 = !togglebox5
+                            break
+                        }
+                        if (box.row == row && box.col == col) {
+                            boxesBelongedTo.push(boxes)
+                            togglebox5 = !togglebox5
+                            break;
+                        }
+                    }
+                }
+            }
+
+        }
+        return boxesBelongedTo
+    }
+
+    function getActualHtmlCells(boxesBelongedTo) {
+        let htmlCollections = []
+        let htmlCollection = []
+        for (const boxes of boxesBelongedTo) {
+            for (const box of boxes) {
+                let element = document.querySelector(`.w[row='${box.row}'][col='${box.col}']`)
+                if (element) {
+                    htmlCollection.push(element)
+                }
+            }
+            if (htmlCollection && htmlCollection.length > 0) {
+                htmlCollections.push(htmlCollection)
+            }
+            htmlCollection = []
+        }
+
+        return htmlCollections
+    }
+
+    function getNextBox(selectedCell, questionCells, direction = "forward") {
+        let nextBoxes = []
+        var row = selectedCell.getAttribute('row')
+        var col = selectedCell.getAttribute('col')
+        var cellFound = false
+        for (const key in questionCells) {
+            if (Object.hasOwnProperty.call(questionCells, key)) {
+                let boxes = questionCells[key]['boxes'];
+                boxes = boxes.map(obj => Object.assign({}, obj));
+                let boxesDirection = questionCells[key]['direction'];
+                // if(direction == 'forward' && boxesDirection == 'down'){
+                //     boxes.sort((a, b) => a.row - b.row);
+                // }
+                // else if(direction == 'backward' && boxesDirection == 'down'){
+                //     boxes.sort((a, b) => b.row - a.row);
+                // }
+                // else if(direction == 'forward' && boxesDirection == 'across'){
+                //     boxes.sort((a, b) => a.col - b.col);
+                // }
+                // else if(direction == 'backward' && boxesDirection == 'across'){
+                //     boxes.sort((a, b) => b.col - a.col);
+                // }
+                //boxes = questionCells[key]['boxes'];
+
+                if(direction == 'forward'){
+                    // boxes.sort((a, b) => a.row - b.row);
+
+                    for (const box of boxes) {
+                        if (box.row == row && box.col == col && box5 == selectedCell && togglebox5) {
+                            togglebox5 = !togglebox5
+                            break
+                        }
+                        if (box == boxes[boxes.length - 1] && box.row == row && box.col == col) {
+                            nextBoxes.push(box)
+                            continue
+                        }
+                        if (box.row == row && box.col == col) {
+                            cellFound = true
+                            togglebox5 = !togglebox5
+                            continue;
+                        }
+                        if (cellFound == true) {
+                            nextBoxes.push(box)
+                            cellFound = false
+                        }
+                    }
+
+                }
+                if(direction == 'backward'){
+                    
+                    if(boxesDirection == 'down'){
+                        boxes.sort((a, b) => b.row - a.row);
+                    }
+                    if(boxesDirection == 'across'){
+                        boxes.sort((a, b) => b.col - a.col);
+                    }
+                    for (const box of boxes) {
+                        if (box.row == row && box.col == col && box5 == selectedCell && togglebox5) {
+                            togglebox5 = !togglebox5
+                            break
+                        }
+                        if (box.row == row && box.col == col) {
+                            cellFound = true
+                            togglebox5 = !togglebox5
+                            continue;
+                        }
+                        if (box == boxes[0] && box.row == row && box.col == col) {
+                            nextBoxes.push(box)
+                            continue
+                        }
+                        if (cellFound == true) {
+                            nextBoxes.push(box)
+                            cellFound = false
+                        }
+                    }
+
+                }
+                //cellFound = false
+            }
+        }
+
+        return nextBoxes && nextBoxes.length > 0 ? nextBoxes : []
+    }
+
+    function getActualNextHtmlCell(nextBox) {
+        let htmlCollection = []
+        for (const box of nextBox) {
+            let element = document.querySelector(`.w[row='${box.row}'][col='${box.col}']`)
+            const containsClass = element.classList.contains('cellhighlight')
+            if (element && containsClass) {
+                htmlCollection.push(element)
+                break
+            }
+
+        }
+
+        return htmlCollection && htmlCollection.length > 0 ? htmlCollection[0] : []
+        //return htmlCollection[0]
+    }
+
+    function positionOfCell(cell, cells) {
+        let position = 0
+        Array.from(cells).forEach((element, index) => {
+            if (element == cell) position = index
+        });
+
+        return position
+    }
+    function nextmover(code) {
+        var row = parseInt(current.getAttribute("row"));
+        var col = parseInt(current.getAttribute("col")); // Corrected spelling here
+
+        switch (code) {
+            case 37: // left arrow
+                col = col === 0 ? total_cols - 1 : col - 1;
+                break;
+            case 38: // up arrow
+                row = row === 0 ? total_rows - 1 : row - 1;
+                break;
+            case 39: // right arrow
+                col = col === total_cols - 1 ? 0 : col + 1;
+                break;
+            case 40: // down arrow
+                row = row === total_rows - 1 ? 0 : row + 1;
+                break;
+            default:
+                break;
+        }
+
+        // Handle black cells
+        var nextCell = document.querySelectorAll("tr")[row].querySelectorAll("th")[col];
+        if (nextCell.classList.contains("b")) {
+            nextmover(code); // Recursively move to the next cell if current is black
+        } else {
+            current.style.background = "transparent"; // Remove previous highlight
+            current = nextCell;
+            current.style.background = "orange"; // Highlight new cell
+
+            current.querySelector("b").focus(); // Focus the input field
+        }
+    }
+
+    function reverseString(str) {
+        // Step 1: Convert the string to an array
+        let strArray = str.split('');
+
+        // Step 2: Reverse the array
+        let reversedArray = strArray.reverse();
+
+        // Step 3: Join the array back into a string
+        let reversedString = reversedArray.join('');
+
+        return reversedString;
+    }
+
+    function showSuccessModal() {
+        const modal = document.getElementById("successModal");
+        const span = document.getElementsByClassName("close")[0];
+        const button = document.getElementsByClassName("modalbtn")[0];
+
+        modal.style.display = "block";
+
+        span.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        button.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    }
+
+    function showFailModal() {
+        const modal = document.getElementById("failModal");
+        const span = document.getElementsByClassName("close")[1];
+        const button = document.getElementsByClassName("modalbtn")[1];
+
+        modal.style.display = "block";
+
+        span.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        button.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    }
+    function getCellsQuestionNumber(cells){
+        var spanValue
+        for (const cell of cells) {
+            spanValue = cell.querySelector('span').innerText
+            if (spanValue) break
+        }
+
+        return spanValue
+    }
+    function checkIfElementsCompletedCorrect(box, cells, axis) {
+
+
+        // var contigousCells = getContigousElements(cells, box, axis)
+
+        var spanValue
+        for (const cell of cells) {
+            spanValue = cell.querySelector('span').innerText
+            if (spanValue) break
+        }
+        // var beginCell_v = cells[0]
+        // var endCell_v = cells[cells.length - 1]
+        // var spanValue = beginCell_v.querySelector('span').innerText ?? endCell_v.querySelector('span').innerText
+        if (spanValue) {
+            var chosenAnswer = '', reverseChosenAnswer
+            var question = questionCells[parseInt(spanValue)]['question']
+            var answer = questionCells[parseInt(spanValue)]['answer']
+
+            let fiveDownLastElement = document.querySelector(`.w[row='${6}'][col='${8}']`)
+            let isAcross5 = spanValue == '5' ? inSameDirection(fiveDownLastElement, previous) : false
+            var question = spanValue == '5' && isAcross5 ? questionCells[parseInt('10')]['question'] : questionCells[parseInt(spanValue)]['question']
+            var answer = spanValue == '5' && isAcross5 ? questionCells[parseInt('10')]['answer'] : questionCells[parseInt(spanValue)]['answer']
+
+
+            Array.from(cells).forEach(element => {
+                let letter = element.querySelector('b').innerText
+                if (letter)
+                    chosenAnswer += letter;
+            });
+            reverseChosenAnswer = reverseString(chosenAnswer)
+            if (chosenAnswer.toLowerCase() == answer.toLowerCase() || reverseChosenAnswer.toLowerCase() == answer.toLowerCase()) {
+                return true
+            } else {
+                // alert("Incorrect answer. Try again.");
+                return false
+            }
+
+
+        }
+
+        return false
+
+    }
+</script>
+<script src="./src/components/Slider.jsx"></script>
+
+</html>

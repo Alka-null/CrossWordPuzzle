@@ -1,0 +1,12 @@
+
+.cellhighlight{
+    background-color: rgb(176, 176, 176) !important;
+}
+.correct{
+    background-color: #0fc0fc !important;
+}
+.nextCell{
+    /* border-color: aqua; */
+    border: 5px solid #0fc0fc;
+}
+
